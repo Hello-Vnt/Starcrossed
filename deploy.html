@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Deploy Starcrossed</title>
+<style>
+body{margin:0; min-height:100vh; background:#0B0820; color:#F4F1FF; font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:560px; margin:0 auto; padding:32px 16px 60px}
+h1{font-size:1.3rem; letter-spacing:.2em; text-transform:uppercase; color:#E7A6C0}
+p,li{color:#9C95C9} b,code{color:#F4F1FF} code{word-break:break-all}
+.card{margin:16px 0; padding:18px; border-radius:16px; background:#1B1542; border:1px solid rgba(167,139,250,.3)}
+button{font:inherit; font-weight:600; color:#fff; background:#6C3BFF; border:0; border-radius:999px; padding:12px 22px; cursor:pointer; margin:6px 8px 6px 0}
+button.main{background:#F2C46D; color:#1c1305}
+button:disabled{opacity:.5; cursor:default}
+a{color:#A78BFA}
+#log{white-space:pre-wrap; font-size:.9rem; color:#F4F1FF}
+</style>
+</head>
+<body>
+<main>
+  <h1>Deploy Starcrossed</h1>
+  <p>Deploys <code>contracts/Starcrossed.sol</code> (Solidity 0.8.20, optimizer 200 runs, EVM paris) from your MetaMask account. Costs about 0.01 BOT in gas. Do testnet first.</p>
+  <div class="card">
+    <button id="t">Deploy to Testnet (968)</button>
+    <button id="m" class="main">Deploy to Mainnet (677)</button>
+    <p id="log">Waiting…</p>
+  </div>
+  <div class="card" id="known"></div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
+<script>
+const NETS = {
+  t: { key: 'testnet', chainId: 968, name: 'BOT Chain Testnet', rpc: 'https://rpc.bohr.life', explorer: 'https://scan.bohr.life' },
+  m: { key: 'mainnet', chainId: 677, name: 'BOT Chain', rpc: 'https://rpc.botchain.ai', explorer: 'https://scan.botchain.ai' },
+};
+const ABI = ['function compatibility(uint8 a, uint8 b) pure returns (uint8)'];
+const BYTECODE = '0x608060405234801561001057600080fd5b5061077e806100206000396000f3fe608060405234801561001057600080fd5b50600436106100615760003560e01c806287a7881461006657806371604721146100df5780639e6fb47214610100578063a760018514610108578063c774b1ea14610128578063d5da886d1461014d575b600080fd5b61007961007436600461058c565b6101a5565b6040516100d69190600060a08201905060018060a01b03835116825260ff602084015116602083015260ff604084015116604083015260ff606084015116606083015267ffffffffffffffff608084015116608083015292915050565b60405180910390f35b6100f26100ed3660046105bb565b61029f565b6040519081526020016100d6565b6000546100f2565b61011b6101163660046105ee565b610419565b6040516100d6919061061e565b61013b6101363660046105bb565b610485565b60405160ff90911681526020016100d6565b61016061015b36600461058c565b610530565b604080516001600160a01b03909616865260ff94851660208701529284169285019290925291909116606083015267ffffffffffffffff16608082015260a0016100d6565b6040805160a0810182526000808252602082018190529181018290526060810182905260808101829052905482106102185760405162461bcd60e51b8152602060048201526011602482015270149958591a5b99c81b9bdd08199bdd5b99607a1b60448201526064015b60405180910390fd5b6000828154811061022b5761022b610662565b60009182526020918290206040805160a08101825291909201546001600160a01b038116825260ff600160a01b8204811694830194909452600160a81b8104841692820192909252600160b01b8204909216606083015267ffffffffffffffff600160b81b90910416608082015292915050565b6000806102ac8484610485565b600080546040805160a0810182523380825260ff808b1660208085019182528b8316858701908152838a166060870190815267ffffffffffffffff428116608089019081526001808c018d558c805298517f290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e5638c0180549751955194519251909316600160b81b0267ffffffffffffffff60b81b19928916600160b01b0260ff60b01b19958a16600160a81b029590951661ffff60a81b1996909916600160a01b026001600160a81b03199098166001600160a01b03929092169190911796909617939093169590951717169190911790915581865282815283862080549384018155865290942001829055519094509192509083907f1cdb693aadd8e9448c8ddd776cb625b797c754a349f0cc64d404d5b13d20db949061040a9088908890879060ff93841681529183166020830152909116604082015260600190565b60405180910390a35092915050565b6001600160a01b03811660009081526001602090815260409182902080548351818402810184019094528084526060939283018282801561047957602002820191906000526020600020905b815481526020019060010190808311610465575b50505050509050919050565b6000600c8360ff1610801561049d5750600c8260ff16105b6104d85760405162461bcd60e51b815260206004820152600c60248201526b24b73b30b634b21039b4b3b760a11b604482015260640161020f565b6040518060c00160405280609081526020016106b9609091398260ff168460ff16600c610505919061068e565b61050f91906106a5565b8151811061051f5761051f610662565b016020015160f81c90505b92915050565b6000818154811061054057600080fd5b6000918252602090912001546001600160a01b038116915060ff600160a01b8204811691600160a81b8104821691600160b01b8204169067ffffffffffffffff600160b81b9091041685565b60006020828403121561059e57600080fd5b5035919050565b803560ff811681146105b657600080fd5b919050565b600080604083850312156105ce57600080fd5b6105d7836105a5565b91506105e5602084016105a5565b90509250929050565b60006020828403121561060057600080fd5b81356001600160a01b038116811461061757600080fd5b9392505050565b6020808252825182820181905260009190848201906040850190845b818110156106565783518352928401929184019160010161063a565b50909695505050505050565b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052601160045260246000fd5b808202811582820484141761052a5761052a610678565b8082018082111561052a5761052a61067856fe492d4f2b5f2b42245c2c542b2d4934522a5a224b295d294d4f344c334d2c5827412661292b523352354b26592445265d5f2a4d35502f4c2e5d2441292b5a2c4b2f512c502e59274b422258264c2c4a2c4c265822244b27592e502c512f4b2c5a5c2941245d2e4c2f50354d2a2c5d26452459264b35523352542961264127582c4d334c342b4d295d294b225a2a523449a264697066735822122094f504848990a57b88c2f1078d413d9d010d7d62413b419170aa984f622dcd3964736f6c63430008140033';
+const log = html => { document.getElementById('log').innerHTML = html; };
+const storeKey = id => 'starcrossed.contract.' + id;
+
+function showKnown() {
+  document.getElementById('known').innerHTML = '<b>Deployed from this browser</b>' + Object.values(NETS).map(n => {
+    let a = null; try { a = localStorage.getItem(storeKey(n.chainId)); } catch {}
+    return `<p>${n.name}: ${a ? `<code>${a}</code> · <a href="${n.explorer}/address/${a}" target="_blank" rel="noopener">explorer</a> · <a href="./${n.key === 'testnet' ? '?net=testnet' : ''}">open app</a>` : 'none yet'}</p>`;
+  }).join('');
+}
+
+async function deploy(n) {
+  if (!window.ethereum) return log('MetaMask not found. Open this page in a browser with MetaMask installed.');
+  if (n.key === 'mainnet' && !confirm('Deploy to BOT Chain MAINNET? This spends real BOT and cannot be undone.')) return;
+  document.querySelectorAll('button').forEach(b => b.disabled = true);
+  try {
+    const hex = '0x' + n.chainId.toString(16);
+    await ethereum.request({ method: 'eth_requestAccounts' });
+    try { await ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: hex }] }); }
+    catch (e) {
+      if ((e.code ?? e?.data?.originalError?.code) !== 4902) throw e;
+      await ethereum.request({ method: 'wallet_addEthereumChain', params: [{
+        chainId: hex, chainName: n.name, nativeCurrency: { name: 'BOT', symbol: 'BOT', decimals: 18 },
+        rpcUrls: [n.rpc], blockExplorerUrls: [n.explorer] }] });
+    }
+    const signer = await new ethers.BrowserProvider(ethereum).getSigner();
+    log('Confirm the deployment in MetaMask…');
+    const c = await new ethers.ContractFactory(ABI, BYTECODE, signer).deploy();
+    const tx = c.deploymentTransaction();
+    log(`Deploying… tx <a href="${n.explorer}/tx/${tx.hash}" target="_blank" rel="noopener">${tx.hash.slice(0, 12)}…</a>`);
+    await c.waitForDeployment();
+    const addr = await c.getAddress();
+    const check = Number(await c.compatibility(4, 6));
+    try { localStorage.setItem(storeKey(n.chainId), addr); } catch {}
+    log(`Deployed on ${n.name} ✓\nAddress: <code>${addr}</code>\nSelf-check compatibility(Leo, Libra) = ${check} (expected 76)\n\nPaste this address into the “${n.key}” contract field in index.html (or send it to Claude).`);
+    showKnown();
+  } catch (e) {
+    log('Failed: ' + (e.shortMessage || e.message || e));
+  }
+  document.querySelectorAll('button').forEach(b => b.disabled = false);
+}
+document.getElementById('t').onclick = () => deploy(NETS.t);
+document.getElementById('m').onclick = () => deploy(NETS.m);
+showKnown();
+</script>
+</body>
+</html>

@@ -1,0 +1,895 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Starcrossed — Are you written in the stars?</title>
+<meta name="description" content="Pick two zodiac signs, get a playful compatibility score, and seal the reading on BOT Chain.">
+<meta name="theme-color" content="#0B0820">
+<meta property="og:title" content="Starcrossed">
+<meta property="og:description" content="Are you written in the stars? Seal your zodiac compatibility reading on BOT Chain.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B0820'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23A78BFA' stroke-width='2'/%3E%3Cpath d='M32 18l3.6 10.4L46 32l-10.4 3.6L32 46l-3.6-10.4L18 32l10.4-3.6z' fill='%23F2C46D'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols:wght@300;400&family=Outfit:wght@300;400;500;600&family=Syne:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-0:#0B0820; --bg-1:#140F33; --card:#1B1542;
+  --violet:#6C3BFF; --violet-soft:#A78BFA;
+  --pink:#E7A6C0; --gold:#F2C46D;
+  --text:#F4F1FF; --muted:#9C95C9;
+  --line:rgba(167,139,250,.22); --line-strong:rgba(167,139,250,.5);
+  --display:"Syne","Outfit",system-ui,sans-serif;
+  --body:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --glyph:"Noto Sans Symbols","Segoe UI Symbol","Apple Symbols",sans-serif;
+  --radius:20px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; min-height:100vh; color:var(--text);
+  font-family:var(--body); font-weight:400; line-height:1.5;
+  background:linear-gradient(180deg,var(--bg-0) 0%,var(--bg-1) 100%) fixed;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+#stars,.glow{position:fixed; inset:0; pointer-events:none; z-index:0}
+#stars{width:100%; height:100%}
+.glow{
+  background:
+    radial-gradient(ellipse 90% 55% at 50% 112%, rgba(108,59,255,.6), rgba(108,59,255,.14) 55%, transparent 75%),
+    radial-gradient(ellipse 50% 30% at 50% 108%, rgba(167,139,250,.45), transparent 70%);
+}
+.wrap{position:relative; z-index:1; width:100%; max-width:1040px; margin:0 auto; padding:0 16px}
+a{color:var(--violet-soft)}
+button{font:inherit; color:inherit; cursor:pointer}
+[hidden]{display:none !important}
+
+.label{
+  font-family:var(--display); font-weight:600; font-size:.7rem;
+  letter-spacing:.32em; text-transform:uppercase; color:var(--muted);
+}
+.glyph{font-family:var(--glyph); font-weight:300; font-variant-emoji:text}
+
+/* header */
+header{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px 0}
+.logo{
+  font-family:var(--display); font-weight:600; font-size:.82rem; letter-spacing:.38em;
+  text-transform:uppercase; color:var(--pink); text-decoration:none;
+}
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  min-height:48px; padding:0 24px; border-radius:999px; border:1px solid transparent;
+  font-family:var(--display); font-weight:600; font-size:.74rem; letter-spacing:.2em;
+  text-transform:uppercase; text-decoration:none; white-space:nowrap;
+  transition:transform .15s, box-shadow .2s, background .2s, border-color .2s;
+}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.6; cursor:default}
+.btn-primary{
+  color:#fff; background:linear-gradient(135deg,var(--violet),#8B63FF 60%,var(--violet-soft));
+  box-shadow:0 8px 30px -8px rgba(108,59,255,.9), inset 0 1px 0 rgba(255,255,255,.25);
+}
+.btn-primary:hover:not(:disabled){box-shadow:0 10px 40px -6px rgba(108,59,255,1), inset 0 1px 0 rgba(255,255,255,.3)}
+.btn-ghost{color:var(--text); background:rgba(27,21,66,.6); border-color:var(--line-strong)}
+.btn-ghost:hover{border-color:var(--violet-soft)}
+.btn-gold{color:#1c1305; background:linear-gradient(135deg,#F7D68F,var(--gold)); box-shadow:0 8px 30px -10px rgba(242,196,109,.8)}
+.btn-sm{min-height:40px; padding:0 16px; font-size:.66rem; letter-spacing:.16em}
+.btn-block{width:100%}
+.dot{width:8px; height:8px; border-radius:50%; background:#6EE7B7; box-shadow:0 0 10px #6EE7B7}
+.dot.warn{background:var(--gold); box-shadow:0 0 10px var(--gold)}
+.spinner{
+  width:16px; height:16px; border-radius:50%;
+  border:2px solid rgba(255,255,255,.3); border-top-color:#fff; animation:spin .8s linear infinite;
+}
+
+/* hero */
+.hero{text-align:center; padding:8px 0 56px}
+.wheel-box{position:relative; width:min(86vw,440px); aspect-ratio:1; margin:0 auto}
+.wheel-box::before{
+  content:""; position:absolute; inset:14%; border-radius:50%;
+  background:radial-gradient(circle, rgba(108,59,255,.42), rgba(108,59,255,.08) 60%, transparent 72%);
+  filter:blur(8px);
+}
+.wheel{position:absolute; inset:0; width:100%; height:100%; animation:spin 140s linear infinite;
+  filter:drop-shadow(0 0 6px rgba(167,139,250,.55))}
+.wheel .g{transform-box:fill-box; transform-origin:center; animation:spin 140s linear infinite reverse}
+.wheel text{font-family:var(--glyph); font-weight:300; font-size:25px; fill:var(--text)}
+.wheel-center{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px}
+h1{
+  margin:0; font-family:var(--display); font-weight:600; text-transform:uppercase;
+  font-size:clamp(1.02rem,4.6vw,1.5rem); letter-spacing:.3em; margin-right:-.3em; color:var(--pink);
+  text-shadow:0 0 24px rgba(231,166,192,.55);
+}
+.wheel-center .star{color:var(--gold); font-size:.8rem}
+.tagline{margin:26px 0 24px; font-size:clamp(1.12rem,4.4vw,1.45rem); font-weight:300; color:var(--text)}
+.cta{display:flex; flex-wrap:wrap; gap:12px; justify-content:center}
+
+/* sections */
+section{padding:28px 0}
+.sec-head{text-align:center; margin-bottom:20px}
+.sec-head h2{margin:8px 0 0; font-family:var(--display); font-weight:600; font-size:clamp(1.3rem,5vw,1.8rem); letter-spacing:.02em}
+.card{
+  background:linear-gradient(180deg, rgba(27,21,66,.92), rgba(27,21,66,.74));
+  border:1px solid var(--line); border-radius:var(--radius);
+  box-shadow:0 20px 60px -30px rgba(0,0,0,.8);
+}
+
+/* pickers */
+.pickers{display:grid; gap:16px}
+.picker{padding:18px 14px 14px}
+.picker-top{display:flex; align-items:baseline; justify-content:space-between; margin:0 4px 14px}
+.picker-top .who{font-family:var(--display); font-weight:600; font-size:.8rem; letter-spacing:.32em; text-transform:uppercase; color:var(--pink)}
+.picker-top .chosen{font-size:.86rem; color:var(--muted)}
+.picker-top .chosen b{color:var(--gold); font-weight:500}
+.grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+.sign{
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  padding:12px 2px 10px; border-radius:14px; border:1px solid var(--line);
+  background:rgba(11,8,32,.5); transition:border-color .2s, box-shadow .2s, background .2s, transform .15s;
+}
+.sign:hover{border-color:var(--line-strong)}
+.sign:active{transform:scale(.97)}
+.sign .glyph{font-size:1.7rem; line-height:1.15; color:var(--violet-soft); transition:color .2s}
+.sign .name{font-family:var(--display); font-weight:600; font-size:.68rem; letter-spacing:.08em; text-transform:uppercase}
+.sign .dates{font-size:.64rem; color:var(--muted); white-space:nowrap}
+.sign[aria-pressed="true"]{
+  border-color:var(--gold); background:rgba(242,196,109,.08);
+  box-shadow:0 0 0 1px var(--gold), 0 0 26px -4px rgba(242,196,109,.6);
+}
+.sign[aria-pressed="true"] .glyph{color:var(--gold); text-shadow:0 0 14px rgba(242,196,109,.8)}
+.sign:focus-visible,.btn:focus-visible{outline:2px solid var(--violet-soft); outline-offset:2px}
+.dob{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 4px 6px; font-size:.86rem; color:var(--text)}
+.dob small{color:var(--muted)}
+.dob input{
+  color-scheme:dark; font:inherit; font-size:16px; color:var(--text); min-height:42px; padding:6px 10px;
+  background:rgba(11,8,32,.6); border:1px solid var(--line); border-radius:12px;
+}
+.dob input:focus-visible{outline:2px solid var(--violet-soft); outline-offset:2px}
+.dob-hint{margin:0 4px 14px; font-size:.74rem; color:var(--muted)}
+
+/* strengths & weaknesses */
+.insights{display:grid; gap:12px; max-width:660px; margin:24px auto 0; text-align:left}
+.insight{padding:16px; border-radius:16px; border:1px solid var(--line); background:rgba(11,8,32,.5)}
+.insight h3{margin:0 0 10px; font-family:var(--display); font-weight:600; font-size:.68rem; letter-spacing:.28em; text-transform:uppercase; color:var(--violet-soft)}
+.insight.good{border-color:rgba(242,196,109,.35)} .insight.good h3{color:var(--gold)}
+.insight.bad{border-color:rgba(231,166,192,.35)} .insight.bad h3{color:var(--pink)}
+.insight ul{margin:0; padding:0; list-style:none; display:grid; gap:9px}
+.insight li{position:relative; padding-left:20px; font-size:.94rem; font-weight:300}
+.insight li::before{content:"✦"; position:absolute; left:0; top:.2em; font-size:.68rem; color:var(--gold)}
+.insight.bad li::before{content:"✧"; color:var(--pink)}
+.insight p{margin:0 0 8px; font-size:.94rem; font-weight:300}
+.insight p:last-child{margin-bottom:0}
+.insight p b{font-weight:500; color:var(--pink)}
+.insight p em{font-style:normal; color:var(--muted)}
+@media (min-width:620px){.insights{grid-template-columns:1fr 1fr} .insight.wide{grid-column:1 / -1}}
+
+/* reading */
+.reading{position:relative; overflow:hidden; padding:26px 18px 22px; text-align:center}
+.constellation{position:absolute; inset:0 0 auto 0; width:100%; height:520px; opacity:.4; pointer-events:none}
+.reading > *:not(.constellation){position:relative}
+.ring{display:block; width:min(78vw,300px); height:auto; margin:6px auto 4px; overflow:visible}
+.ring .progress{transition:stroke-dashoffset 1.5s cubic-bezier(.2,.7,.2,1); filter:drop-shadow(0 0 8px rgba(242,196,109,.7))}
+.ring .orbit{transform-origin:150px 150px; animation:spin 70s linear infinite}
+.ring .orbit .g{transform-box:fill-box; transform-origin:center; animation:spin 70s linear infinite reverse}
+.ring .orbit text{font-family:var(--glyph); font-weight:400; font-size:18px; fill:var(--gold)}
+.ring .score{font-family:var(--display); font-weight:700; font-size:58px; fill:var(--gold)}
+.ring .pct{font-family:var(--display); font-weight:600; font-size:22px; fill:var(--gold)}
+.ring .band{font-family:var(--display); font-weight:600; font-size:9.5px; letter-spacing:.24em; fill:var(--pink); text-transform:uppercase}
+.pair{font-family:var(--display); font-weight:600; font-size:1.2rem; margin:10px 0 2px}
+.pair span{color:var(--muted); font-weight:500; margin:0 .3em}
+.elements{color:var(--violet-soft); letter-spacing:.3em}
+.blurb{max-width:36ch; margin:12px auto 0; font-size:1.05rem; font-weight:300; text-wrap:balance}
+.meta{margin:14px 0 0; font-size:.84rem; color:var(--muted)}
+.actions{display:flex; flex-direction:column; gap:10px; max-width:360px; margin:22px auto 0}
+.note{margin:10px auto 0; max-width:40ch; font-size:.8rem; color:var(--muted)}
+.error{
+  margin:16px auto 0; max-width:360px; padding:14px 16px; border-radius:14px; text-align:left;
+  border:1px solid rgba(231,166,192,.45); background:rgba(231,166,192,.08); font-size:.9rem;
+}
+.sealed{
+  margin:22px auto 0; max-width:420px; padding:18px 16px; border-radius:16px;
+  border:1px solid rgba(242,196,109,.5); background:rgba(242,196,109,.06);
+}
+.sealed .id{font-family:var(--body); font-weight:600; font-size:1.5rem; color:var(--gold); margin:4px 0 6px}
+.sealed .tx{font-size:.86rem; color:var(--muted); word-break:break-all}
+
+.banner{
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px 16px;
+  margin:0 0 8px; padding:10px 16px; border-radius:14px; font-size:.86rem; text-align:center;
+  border:1px solid rgba(242,196,109,.4); background:rgba(242,196,109,.07); color:var(--text);
+}
+
+/* my readings */
+.list{display:grid; gap:8px; max-width:640px; margin:0 auto}
+.row{
+  display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:14px;
+  border:1px solid var(--line); background:rgba(27,21,66,.7); color:var(--text); text-decoration:none;
+  transition:border-color .2s;
+}
+.row:hover{border-color:var(--line-strong)}
+.row .glyph{font-size:1.25rem; color:var(--violet-soft); white-space:nowrap}
+.row .who{flex:1; min-width:0}
+.row .who b{display:block; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.row .who small{color:var(--muted)}
+.row .sc{font-family:var(--display); font-weight:700; color:var(--gold); font-size:1.1rem}
+.empty{text-align:center; color:var(--muted); font-size:.95rem}
+
+footer{padding:40px 0 max(28px,env(safe-area-inset-bottom)); text-align:center; font-size:.82rem; color:var(--muted)}
+footer p{margin:6px 0}
+footer .addr{word-break:break-all}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (min-width:860px){
+  .pickers{grid-template-columns:1fr 1fr; gap:20px}
+  .picker{padding:22px 18px 18px}
+  .hero{padding-bottom:72px}
+  .reading{padding:36px 28px 30px}
+}
+@media (prefers-reduced-motion:reduce){
+  .wheel,.wheel .g,.ring .orbit,.ring .orbit .g{animation:none}
+  .ring .progress{transition:none}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="glow" aria-hidden="true"></div>
+
+<div class="wrap">
+  <header>
+    <a class="logo" href="./">Starcrossed</a>
+    <span data-wallet="sm"></span>
+  </header>
+
+  <div id="netBanner" class="banner" hidden>
+    <span>Your wallet is on a different network.</span>
+    <button class="btn btn-gold btn-sm" id="switchBtn">Switch to BOT Chain</button>
+  </div>
+
+  <main>
+    <!-- Look up (?id=) -->
+    <section id="lookup" hidden>
+      <div class="sec-head"><div class="label">Sealed reading</div></div>
+      <div class="card reading" id="lookupCard"></div>
+    </section>
+
+    <!-- Landing -->
+    <section class="hero" id="hero">
+      <div class="wheel-box">
+        <svg class="wheel" id="wheel" viewBox="0 0 400 400" aria-hidden="true"></svg>
+        <div class="wheel-center">
+          <span class="star">✦</span>
+          <h1>Starcrossed</h1>
+        </div>
+      </div>
+      <p class="tagline">Are you written in the stars?</p>
+      <div class="cta">
+        <span data-wallet="lg"></span>
+        <a class="btn btn-ghost" href="#pick">Pick your signs</a>
+      </div>
+    </section>
+
+    <!-- Pick signs -->
+    <section id="pick">
+      <div class="sec-head">
+        <div class="label">Step one</div>
+        <h2>Choose two signs</h2>
+      </div>
+      <div class="pickers">
+        <div class="card picker">
+          <div class="picker-top"><span class="who">You</span><span class="chosen" id="chosenA">Pick a sign</span></div>
+          <label class="dob"><span>Your date of birth <small>(optional)</small></span><input type="date" id="dobA" min="1900-01-01"></label>
+          <p class="dob-hint">Finds the sign and sharpens the reading. Stays in this browser — never sent or sealed.</p>
+          <div class="grid" id="gridA" role="group" aria-label="Your sign"></div>
+        </div>
+        <div class="card picker">
+          <div class="picker-top"><span class="who">Them</span><span class="chosen" id="chosenB">Pick a sign</span></div>
+          <label class="dob"><span>Their date of birth <small>(optional)</small></span><input type="date" id="dobB" min="1900-01-01"></label>
+          <p class="dob-hint">Finds the sign and sharpens the reading. Stays in this browser — never sent or sealed.</p>
+          <div class="grid" id="gridB" role="group" aria-label="Their sign"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Result + seal -->
+    <section id="result" hidden>
+      <div class="sec-head">
+        <div class="label">Your reading</div>
+      </div>
+      <div class="card reading">
+        <div id="resultBody"></div>
+        <div id="sealArea"></div>
+      </div>
+    </section>
+
+    <!-- My readings -->
+    <section id="mine" hidden>
+      <div class="sec-head">
+        <div class="label">Sealed by you</div>
+        <h2>My readings</h2>
+      </div>
+      <div id="mineList" class="list"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p id="contractLine"></p>
+    <p>For entertainment only.</p>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
+<script>
+/* ───────────── Config ───────────── */
+// After deploying contracts/Starcrossed.sol, paste the address into `contract`.
+const NETWORKS = {
+  mainnet: {
+    chainId: 677, name: 'BOT Chain', rpc: 'https://rpc.botchain.ai', explorer: 'https://scan.botchain.ai',
+    currency: { name: 'BOT', symbol: 'BOT', decimals: 18 },
+    contract: '0x35b05ce3b8254C4BAFaE7AE912b1018dF5e71376',
+  },
+  testnet: {
+    chainId: 968, name: 'BOT Chain Testnet', rpc: 'https://rpc.bohr.life', explorer: 'https://scan.bohr.life',
+    currency: { name: 'BOT', symbol: 'BOT', decimals: 18 },
+    contract: '',
+  },
+};
+const params = new URLSearchParams(location.search);
+const NET_KEY = params.get('net') === 'testnet' ? 'testnet' : 'mainnet';
+const NET = NETWORKS[NET_KEY];
+if (!NET.contract && /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
+  // deploy.html remembers the address it just deployed so it can be tried before it's pasted in above.
+  try { NET.contract = localStorage.getItem('starcrossed.contract.' + NET.chainId) || ''; } catch {}
+}
+const CHAIN_HEX = '0x' + NET.chainId.toString(16);
+// Until a contract address is set, sealing is simulated in this browser only.
+const PREVIEW = !NET.contract;
+
+const ABI = [
+  'function seal(uint8 signA, uint8 signB) returns (uint256 id)',
+  'function getReading(uint256 id) view returns (tuple(address creator, uint8 signA, uint8 signB, uint8 score, uint64 timestamp))',
+  'function readingsOf(address user) view returns (uint256[])',
+  'function compatibility(uint8 a, uint8 b) pure returns (uint8)',
+  'event ReadingSealed(uint256 indexed id, address indexed creator, uint8 signA, uint8 signB, uint8 score)',
+];
+
+/* ───────────── Data ───────────── */
+const T = '︎'; // force text (non-emoji) glyphs
+const SIGNS = [
+  ['Aries', '♈', 'Mar 21 – Apr 19'], ['Taurus', '♉', 'Apr 20 – May 20'], ['Gemini', '♊', 'May 21 – Jun 20'],
+  ['Cancer', '♋', 'Jun 21 – Jul 22'], ['Leo', '♌', 'Jul 23 – Aug 22'], ['Virgo', '♍', 'Aug 23 – Sep 22'],
+  ['Libra', '♎', 'Sep 23 – Oct 22'], ['Scorpio', '♏', 'Oct 23 – Nov 21'], ['Sagittarius', '♐', 'Nov 22 – Dec 21'],
+  ['Capricorn', '♑', 'Dec 22 – Jan 19'], ['Aquarius', '♒', 'Jan 20 – Feb 18'], ['Pisces', '♓', 'Feb 19 – Mar 20'],
+].map(([name, glyph, dates], i) => ({ name, glyph: glyph + T, dates, element: i % 4 }));
+const ELEMENTS = ['Fire', 'Earth', 'Air', 'Water'];
+
+// Mirror of the on-chain TABLE (contracts/Starcrossed.sol) for instant previews.
+const TABLE_HEX = '492d4f2b5f2b42245c2c542b2d4934522a5a224b295d294d4f344c334d2c582741266129' +
+  '2b523352354b26592445265d5f2a4d35502f4c2e5d2441292b5a2c4b2f512c502e59274b' +
+  '422258264c2c4a2c4c265822244b27592e502c512f4b2c5a5c2941245d2e4c2f50354d2a' +
+  '2c5d26452459264b35523352542961264127582c4d334c342b4d295d294b225a2a523449';
+const localScore = (a, b) => parseInt(TABLE_HEX.substr((a * 12 + b) * 2, 2), 16);
+
+const BLURBS = {
+  '0-0': 'Two flames, one bonfire. Spectacular — just keep a bucket of water nearby.',
+  '0-1': 'One wants to leap, the other wants a five-year plan. Somehow, it builds something.',
+  '0-2': 'Air feeds the flame. Expect big ideas, late nights and zero chill.',
+  '0-3': 'Steam rises. Passion runs deep — so do the feelings. Handle with care.',
+  '1-1': 'Steady meets steady. Slow burn, strong roots, shared spreadsheets.',
+  '1-2': 'Head in the clouds, feet on the ground. You keep each other curious.',
+  '1-3': 'Rain on fertile soil. Quietly, beautifully, things grow here.',
+  '2-2': 'Endless conversation, endless plans. Somebody please book the actual trip.',
+  '2-3': 'A breeze over deep water — ripples of intrigue, a little mystery.',
+  '3-3': 'Two oceans meeting. Intuitive, tender, and occasionally a tidal wave.',
+};
+// Per sign: [what they bring, what to watch, undertone when it colours a decan]
+const TRAITS = [
+  ['courage and a spark that gets things started', 'impatience when things move slowly', 'bolder and more impulsive'],
+  ['loyalty and a calm, steady presence', 'stubbornness once a mind is made up', 'steadier and more sensual'],
+  ['curiosity and conversation that never runs dry', 'a restless, easily distracted streak', 'wittier and more restless'],
+  ['deep care and emotional intuition', 'retreating into a shell when hurt', 'softer and more protective'],
+  ['warmth, generosity and big-hearted loyalty', 'needing the spotlight a little too much', 'prouder and more expressive'],
+  ['thoughtfulness and an eye for what needs fixing', 'over-analysing and quiet criticism', 'more precise and analytical'],
+  ['charm, fairness and a gift for harmony', 'avoiding conflict until it boils over', 'more diplomatic and romantic'],
+  ['intensity, depth and fierce devotion', 'jealousy and holding on to grudges', 'more intense and private'],
+  ['optimism, honesty and a love of adventure', 'bluntness and itchy feet', 'freer and more adventurous'],
+  ['ambition, patience and dependability', 'putting work before feelings', 'more driven and disciplined'],
+  ['originality and a fiercely open mind', 'emotional distance when things get heavy', 'more independent and unconventional'],
+  ['empathy, imagination and gentle devotion', 'drifting off instead of facing problems', 'dreamier and more intuitive'],
+];
+// Element pair → [strengths, weaknesses]
+const DYNAMICS = {
+  '0-0': [['Matching energy — neither of you has to slow down for the other', 'Instant chemistry and a shared appetite for adventure'],
+          ['Arguments ignite fast when both want the last word', 'Lots of sparks, not always enough rest']],
+  '0-1': [['Fire brings the vision, Earth makes it real', 'One energises while the other stabilises'],
+          ['Different speeds — one sprints while the other plans', 'Spontaneity can clash with a need for security']],
+  '0-2': [['Ideas turn into action quickly when you team up', 'Playful, social and rarely bored together'],
+          ['Big plans can outrun the follow-through', 'Feelings may get skipped in all the excitement']],
+  '0-3': [['Passion meets emotional depth — it is never lukewarm', 'You pull each other out of your comfort zones'],
+          ['Blunt words can wound a sensitive heart', 'Moodiness on one side, impatience on the other']],
+  '1-1': [['Shared values around loyalty, comfort and commitment', 'You build things that last, slowly and surely'],
+          ['Routine can quietly turn into a rut', 'Two stubborn minds make compromise slow']],
+  '1-2': [['Practical sense balances fresh ideas', 'You each notice what the other tends to miss'],
+          ['One craves consistency, the other craves change', 'Talking and doing don’t always line up']],
+  '1-3': [['A naturally nurturing, secure bond', 'Emotional depth with practical support to match'],
+          ['Comfort zones can get a little too comfortable', 'Unspoken feelings may pile up without being aired']],
+  '2-2': [['Effortless conversation and mental chemistry', 'Plenty of freedom, very little clinginess'],
+          ['Staying in your heads instead of your hearts', 'Decisions get debated more than they get made']],
+  '2-3': [['Logic and intuition together cover every angle', 'Real curiosity about each other’s very different world'],
+          ['One wants to talk it out, the other wants to feel it out', 'Detachment can read as coldness to a tender heart']],
+  '3-3': [['You understand each other without many words', 'Deep empathy and emotional safety'],
+          ['Moods can amplify each other', 'Hard to stay objective when feelings run high']],
+};
+// Modality pair (cardinal 0, fixed 1, mutable 2) → [strength, weakness]
+const MODES = {
+  '0-0': ['Two initiators — things actually get started', 'Both like to lead, so power struggles can creep in'],
+  '0-1': ['One starts things, the other sees them through', 'A push for change can meet a refusal to budge'],
+  '0-2': ['One leads, the other adapts with ease', 'Decisiveness can steamroll a go-with-the-flow nature'],
+  '1-1': ['Unshakeable loyalty once you have both committed', 'Neither backs down easily in a standoff'],
+  '1-2': ['Stability on one side, flexibility on the other', 'Consistency can feel rigid to a free spirit'],
+  '2-2': ['Easy-going and endlessly adaptable together', 'Without an anchor, plans tend to drift'],
+};
+const pairKey = (x, y) => [x, y].sort().join('-');
+function insights(a, b) {
+  const [es, ew] = DYNAMICS[pairKey(SIGNS[a].element, SIGNS[b].element)];
+  const [ms, mw] = MODES[pairKey(a % 3, b % 3)];
+  const strengths = [...es, ms], weaknesses = [...ew, mw];
+  if (a === b) strengths[1] = 'You recognise yourself in each other straight away';
+  if (Math.abs(a - b) === 6) strengths[1] = 'Opposite signs — what one lacks, the other has';
+  return { strengths, weaknesses };
+}
+
+/* Date of birth → sign, decan, cusp. Used only in the browser; never stored or sent. */
+const STARTS = [[3,21],[4,20],[5,21],[6,21],[7,23],[8,23],[9,23],[10,23],[11,22],[12,22],[1,20],[2,19]];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const doy = (m, d) => Math.round((Date.UTC(2000, m - 1, d) - Date.UTC(2000, 0, 1)) / 864e5);
+function fromDob(str) {
+  const m_ = /^(\d{4})-(\d{2})-(\d{2})$/.exec(str || '');
+  if (!m_) return null;
+  const y = +m_[1], m = +m_[2], d = +m_[3], date = new Date(y, m - 1, d);
+  if (y < 1900 || date > new Date() || date.getMonth() !== m - 1) return null;
+  const n = doy(m, d);
+  let sign = 0, since = 999;
+  STARTS.forEach(([sm, sd], i) => { const diff = (n - doy(sm, sd) + 366) % 366; if (diff < since) { since = diff; sign = i; } });
+  const next = STARTS[(sign + 1) % 12], left = (doy(next[0], next[1]) - n + 366) % 366;
+  const decan = since < 10 ? 1 : since < 20 ? 2 : 3;
+  return {
+    sign, decan, day: `${MONTHS[m - 1]} ${d}`,
+    ruler: (sign + 4 * (decan - 1)) % 12,
+    cusp: since < 2 ? (sign + 11) % 12 : left <= 2 ? (sign + 1) % 12 : null,
+  };
+}
+function decanLine(info) {
+  const S = SIGNS[info.sign], ord = ['first', 'second', 'third'][info.decan - 1];
+  let t = info.decan === 1
+    ? `Born ${info.day}, in the first decan of ${S.name} — ${S.name} at its purest.`
+    : `Born ${info.day}, in the ${ord} decan of ${S.name} — a ${SIGNS[info.ruler].name} undertone makes this ${S.name} ${TRAITS[info.ruler][2]}.`;
+  if (info.cusp !== null) t += ` Right on the cusp, so a little ${SIGNS[info.cusp].name} comes through too.`;
+  return t;
+}
+
+const band = s => s >= 80 ? 'Cosmic soulmates' : s >= 50 ? 'Worth exploring' : 'Opposites attract?';
+const blurb = (a, b) => {
+  const e = [SIGNS[a].element, SIGNS[b].element].sort();
+  return BLURBS[e.join('-')];
+};
+
+/* ───────────── Helpers ───────────── */
+const $ = id => document.getElementById(id);
+const short = a => a.slice(0, 6) + '…' + a.slice(-4);
+const fmtDate = ts => new Date(ts * 1000).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+const shareUrl = id => location.origin + location.pathname + '?id=' + id + (NET_KEY === 'testnet' ? '&net=testnet' : '');
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ───────────── Chain access ───────────── */
+let readProvider;
+const readContract = () => {
+  readProvider ??= new ethers.JsonRpcProvider(NET.rpc, NET.chainId, { staticNetwork: true });
+  return new ethers.Contract(NET.contract, ABI, readProvider);
+};
+const toReading = (r, id) => ({
+  id: Number(id), creator: r.creator, a: Number(r.signA), b: Number(r.signB),
+  score: Number(r.score), ts: Number(r.timestamp),
+});
+
+const live = {
+  async get(id) {
+    try { return toReading(await readContract().getReading(id), id); }
+    catch (e) { if (e.code === 'CALL_EXCEPTION') return null; throw e; }
+  },
+  async listOf(addr) {
+    const c = readContract();
+    const ids = [...await c.readingsOf(addr)].reverse().slice(0, 25);
+    return Promise.all(ids.map(async id => toReading(await c.getReading(id), id)));
+  },
+  async seal(a, b) {
+    const signer = await new ethers.BrowserProvider(window.ethereum).getSigner();
+    const c = new ethers.Contract(NET.contract, ABI, signer);
+    const tx = await c.seal(a, b);
+    const rc = await tx.wait();
+    let id = null;
+    for (const log of rc.logs) {
+      try {
+        const p = c.interface.parseLog(log);
+        if (p && p.name === 'ReadingSealed') id = Number(p.args.id);
+      } catch {}
+    }
+    if (id === null) throw new Error('Sealed, but the reading ID could not be read from the transaction.');
+    return { id, hash: tx.hash };
+  },
+};
+
+// Local stand-in used only while no contract address is configured.
+const PREVIEW_KEY = 'starcrossed.preview';
+const previewStore = {
+  all() { try { return JSON.parse(localStorage.getItem(PREVIEW_KEY)) || []; } catch { return []; } },
+  save(list) { try { localStorage.setItem(PREVIEW_KEY, JSON.stringify(list)); } catch {} },
+};
+const preview = {
+  async get(id) { const r = previewStore.all()[id]; return r ? { ...r, id } : null; },
+  async listOf() { return previewStore.all().map((r, id) => ({ ...r, id })).reverse(); },
+  async seal(a, b) {
+    await new Promise(r => setTimeout(r, 1800));
+    const list = previewStore.all();
+    list.push({ creator: account, a, b, score: localScore(a, b), ts: Math.floor(Date.now() / 1000) });
+    previewStore.save(list);
+    return { id: list.length - 1, hash: null };
+  },
+};
+const chain = PREVIEW ? preview : live;
+
+/* ───────────── Wallet ───────────── */
+let account = null, onChain = false;
+const eth = () => window.ethereum;
+
+async function refreshWallet() {
+  if (eth()) {
+    try {
+      const [accts, cid] = await Promise.all([
+        eth().request({ method: 'eth_accounts' }), eth().request({ method: 'eth_chainId' }),
+      ]);
+      account = accts[0] ? ethers.getAddress(accts[0]) : null;
+      onChain = parseInt(cid, 16) === NET.chainId;
+    } catch { account = null; }
+  }
+  renderWallet(); renderSeal(); loadMine();
+}
+
+async function switchChain() {
+  try {
+    await eth().request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_HEX }] });
+  } catch (e) {
+    const code = e.code ?? e?.data?.originalError?.code;
+    if (code !== 4902 && !/unrecognized chain/i.test(e.message || '')) throw e;
+    await eth().request({
+      method: 'wallet_addEthereumChain',
+      params: [{
+        chainId: CHAIN_HEX, chainName: NET.name, nativeCurrency: NET.currency,
+        rpcUrls: [NET.rpc], blockExplorerUrls: [NET.explorer],
+      }],
+    });
+  }
+}
+
+async function connect() {
+  if (!eth()) return;
+  try {
+    await eth().request({ method: 'eth_requestAccounts' });
+    await switchChain();
+  } catch (e) { /* user dismissed — the UI reflects whatever state we ended in */ }
+  await refreshWallet();
+}
+
+function renderWallet() {
+  const install = isMobile
+    ? `<a class="btn btn-primary SIZE" href="https://metamask.app.link/dapp/${location.host}${location.pathname}${location.search}">Open in MetaMask</a>`
+    : `<a class="btn btn-primary SIZE" href="https://metamask.io/download/" target="_blank" rel="noopener">Install MetaMask</a>`;
+  document.querySelectorAll('[data-wallet]').forEach(slot => {
+    const sm = slot.dataset.wallet === 'sm';
+    const size = sm ? 'btn-sm' : '';
+    if (!eth()) slot.innerHTML = install.replace('SIZE', size);
+    else if (!account) slot.innerHTML = `<button class="btn btn-primary ${size}" data-act="connect">Connect MetaMask</button>`;
+    else slot.innerHTML = `<span class="btn btn-ghost ${size}" title="${account}"><span class="dot ${onChain ? '' : 'warn'}"></span>${short(account)}</span>`;
+  });
+  $('netBanner').hidden = !(account && !onChain);
+}
+
+document.addEventListener('click', e => {
+  const act = e.target.closest('[data-act]')?.dataset.act;
+  if (act === 'connect') connect();
+  if (act === 'seal') seal();
+  if (act === 'copy') copyLink(e.target.closest('[data-act]'));
+});
+$('switchBtn').onclick = async () => { try { await switchChain(); } catch {} refreshWallet(); };
+if (eth()?.on) {
+  eth().on('accountsChanged', refreshWallet);
+  eth().on('chainChanged', refreshWallet);
+}
+
+/* ───────────── Rendering ───────────── */
+const C = 2 * Math.PI * 110;
+let ringSeq = 0;
+function readingMarkup(r, opt = {}) {
+  const A = SIGNS[r.a], B = SIGNS[r.b], n = ++ringSeq;
+  const [la, lb] = opt.labels || ['First sign', 'Second sign'];
+  const ins = insights(r.a, r.b), dob = opt.dob || {};
+  const person = (label, i, info) => `<p><b>${label} · ${SIGNS[i].name}</b> brings ${TRAITS[i][0]}. <em>Watch for ${TRAITS[i][1]}.</em>${info ? ' ' + decanLine(info) : ''}</p>`;
+  return `
+    <svg class="constellation" viewBox="0 0 400 520" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <g fill="none" stroke="#A78BFA" stroke-width=".8" stroke-opacity=".55">
+        <polyline points="18,70 62,44 104,82 150,58"/><polyline points="104,82 92,130"/>
+        <polyline points="300,36 338,72 382,58"/><polyline points="338,72 350,122 318,150"/>
+        <polyline points="24,380 58,420 44,470 96,492"/><polyline points="310,430 352,404 384,446 346,488"/>
+      </g>
+      <g fill="#F4F1FF">
+        ${[[18,70],[62,44],[104,82],[150,58],[92,130],[300,36],[338,72],[382,58],[350,122],[318,150],[24,380],[58,420],[44,470],[96,492],[310,430],[352,404],[384,446],[346,488]]
+          .map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 3 ? 1.6 : 2.4}"/>`).join('')}
+      </g>
+    </svg>
+    <svg class="ring" viewBox="0 0 300 300" role="img" aria-label="${r.score} percent compatibility">
+      <defs>
+        <linearGradient id="gold${n}" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#F9E0A6"/><stop offset="1" stop-color="#F2C46D"/>
+        </linearGradient>
+      </defs>
+      <circle cx="150" cy="150" r="138" fill="none" stroke="#A78BFA" stroke-opacity=".4" stroke-width="1" stroke-dasharray="2 7"/>
+      <circle cx="150" cy="150" r="110" fill="none" stroke="#A78BFA" stroke-opacity=".18" stroke-width="7"/>
+      <circle cx="150" cy="150" r="88" fill="none" stroke="#A78BFA" stroke-opacity=".22" stroke-width="1"/>
+      <circle class="progress" cx="150" cy="150" r="110" fill="none" stroke="url(#gold${n})" stroke-width="7" stroke-linecap="round"
+        stroke-dasharray="${C}" stroke-dashoffset="${C}" transform="rotate(-90 150 150)" data-score="${r.score}"/>
+      <g class="orbit">
+        ${[[12, A], [288, B]].map(([x, s]) => `
+        <g class="g">
+          <circle cx="${x}" cy="150" r="18" fill="#1B1542" stroke="#F2C46D" stroke-width="1"/>
+          <text x="${x}" y="150" text-anchor="middle" dominant-baseline="central">${s.glyph}</text>
+        </g>`).join('')}
+      </g>
+      <text x="150" y="158" text-anchor="middle"><tspan class="score" data-count="${r.score}">0</tspan><tspan class="pct" dx="2">%</tspan></text>
+      <text class="band" x="150" y="190" text-anchor="middle">${band(r.score)}</text>
+    </svg>
+    <div class="pair">${A.name}<span>×</span>${B.name}</div>
+    <div class="label elements">${ELEMENTS[A.element]} × ${ELEMENTS[B.element]}</div>
+    <p class="blurb">${blurb(r.a, r.b)}</p>
+    <div class="insights">
+      <div class="insight good"><h3>Strengths</h3><ul>${ins.strengths.map(x => `<li>${x}</li>`).join('')}</ul></div>
+      <div class="insight bad"><h3>Weaknesses</h3><ul>${ins.weaknesses.map(x => `<li>${x}</li>`).join('')}</ul></div>
+      <div class="insight wide"><h3>What each of you brings</h3>${person(la, r.a, dob.A)}${person(lb, r.b, dob.B)}</div>
+    </div>`;
+}
+
+function animateReading(root) {
+  const arc = root.querySelector('.progress'), num = root.querySelector('[data-count]');
+  const score = +arc.dataset.score, target = C * (1 - score / 100);
+  if (reduced) { arc.style.strokeDashoffset = target; num.textContent = score; return; }
+  requestAnimationFrame(() => requestAnimationFrame(() => { arc.style.strokeDashoffset = target; }));
+  const t0 = performance.now(), dur = 1400;
+  const tick = t => {
+    const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+    num.textContent = Math.round(score * e);
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+  setTimeout(() => { num.textContent = score; }, dur + 200); // background tabs throttle rAF
+}
+
+/* Hero wheel */
+(function buildWheel() {
+  const pt = (r, deg) => { const a = (deg - 90) * Math.PI / 180; return [200 + r * Math.cos(a), 200 + r * Math.sin(a)]; };
+  let s = '<g fill="none" stroke="#A78BFA">';
+  s += '<circle cx="200" cy="200" r="194" stroke-opacity=".9" stroke-width="1"/>';
+  s += '<circle cx="200" cy="200" r="146" stroke-opacity=".7" stroke-width="1"/>';
+  s += '<circle cx="200" cy="200" r="136" stroke-opacity=".35" stroke-width="1" stroke-dasharray="1 6"/>';
+  s += '<circle cx="200" cy="200" r="100" stroke-opacity=".3" stroke-width="1"/>';
+  for (let i = 0; i < 12; i++) {
+    const [x1, y1] = pt(146, i * 30 + 15), [x2, y2] = pt(194, i * 30 + 15);
+    s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-opacity=".55"/>`;
+  }
+  for (let i = 0; i < 72; i++) {
+    const [x1, y1] = pt(194, i * 5), [x2, y2] = pt(i % 6 ? 198 : 200, i * 5);
+    s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-opacity=".6"/>`;
+  }
+  s += '</g>';
+  SIGNS.forEach((sign, i) => {
+    const [x, y] = pt(170, i * 30);
+    s += `<g class="g"><text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central">${sign.glyph}</text></g>`;
+  });
+  $('wheel').innerHTML = s;
+})();
+
+/* Pickers */
+const pick = { A: null, B: null }, dob = { A: null, B: null };
+function setPick(which, i) {
+  pick[which] = i;
+  $('grid' + which).querySelectorAll('.sign').forEach(b => b.setAttribute('aria-pressed', +b.dataset.i === i));
+  const info = dob[which];
+  $('chosen' + which).innerHTML = `<b>${SIGNS[i].name}</b> · ${info ? `${info.decan}${['st', 'nd', 'rd'][info.decan - 1]} decan` : ELEMENTS[SIGNS[i].element]}`;
+  onPick(which);
+}
+function buildGrid(which) {
+  $('grid' + which).innerHTML = SIGNS.map((s, i) => `
+    <button class="sign" type="button" data-i="${i}" aria-pressed="false">
+      <span class="glyph">${s.glyph}</span><span class="name">${s.name}</span><span class="dates">${s.dates}</span>
+    </button>`).join('');
+  $('grid' + which).addEventListener('click', e => {
+    const btn = e.target.closest('.sign'); if (!btn) return;
+    // Choosing by hand overrides a date of birth that points at a different sign.
+    if (dob[which] && dob[which].sign !== +btn.dataset.i) { dob[which] = null; $('dob' + which).value = ''; }
+    setPick(which, +btn.dataset.i);
+  });
+  $('dob' + which).max = new Date().toLocaleDateString('en-CA');
+  $('dob' + which).addEventListener('change', e => {
+    const info = fromDob(e.target.value);
+    dob[which] = info;
+    if (info) setPick(which, info.sign);
+    else if (pick[which] !== null) setPick(which, pick[which]);
+  });
+}
+buildGrid('A'); buildGrid('B');
+
+let sealState = { status: 'idle' }; // idle | pending | done | error
+async function onPick(which) {
+  if (pick.A === null || pick.B === null) {
+    if (which === 'A' && innerWidth < 860) $('gridB').closest('.picker').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
+  const a = pick.A, b = pick.B;
+  let score = localScore(a, b);
+  if (!PREVIEW) {
+    // The contract is the source of truth; fall back to the mirrored table if the RPC is slow.
+    try { score = Number(await Promise.race([readContract().compatibility(a, b), new Promise((_, rej) => setTimeout(rej, 2500))])); } catch {}
+    if (a !== pick.A || b !== pick.B) return;
+  }
+  sealState = { status: 'idle' };
+  $('result').hidden = false;
+  $('resultBody').innerHTML = readingMarkup({ a, b, score }, { labels: ['You', 'Them'], dob });
+  animateReading($('resultBody'));
+  renderSeal();
+  $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderSeal() {
+  const el = $('sealArea');
+  if (pick.A === null || pick.B === null) { el.innerHTML = ''; return; }
+  const s = sealState;
+  if (s.status === 'done') {
+    el.innerHTML = `
+      <div class="sealed">
+        <div class="label">Sealed in the stars</div>
+        <div class="id">Reading #${s.id}</div>
+        <div class="tx">${s.hash
+          ? `Tx <a href="${NET.explorer}/tx/${s.hash}" target="_blank" rel="noopener">${short(s.hash)}</a> on ${NET.name}`
+          : 'Preview only — saved in this browser only.'}</div>
+        <div class="actions">
+          <button class="btn btn-gold btn-block" data-act="copy" data-link="${shareUrl(s.id)}">Copy share link</button>
+          <a class="btn btn-ghost btn-block" href="${shareUrl(s.id)}">View reading</a>
+        </div>
+      </div>`;
+    return;
+  }
+  let btn;
+  if (s.status === 'pending') btn = `<button class="btn btn-primary btn-block" disabled><span class="spinner"></span>Sealing in the stars…</button>`;
+  else if (PREVIEW) btn = `<button class="btn btn-primary btn-block" data-act="seal">Seal on BOT Chain</button>`;
+  else if (!eth()) btn = `<span data-wallet="lg"></span>`;
+  else if (!account) btn = `<button class="btn btn-primary btn-block" data-act="connect">Connect MetaMask to seal</button>`;
+  else if (!onChain) btn = `<button class="btn btn-gold btn-block" data-act="seal">Switch to BOT Chain</button>`;
+  else btn = `<button class="btn btn-primary btn-block" data-act="seal">${s.status === 'error' ? 'Try again' : 'Seal on BOT Chain'}</button>`;
+  const err = s.status === 'error' ? `<div class="error" role="alert">${s.message}</div>` : '';
+  const note = PREVIEW
+    ? 'Preview mode: the contract isn’t deployed yet, so sealing is simulated in this browser.'
+    : s.status === 'pending' ? 'Confirm in MetaMask, then hang tight while the block lands.'
+    : 'One small transaction. Your reading gets a public ID anyone can look up.';
+  el.innerHTML = `${err}<div class="actions">${btn}</div><p class="note">${note}</p>`;
+  if (!PREVIEW && !eth()) renderWallet();
+}
+
+async function seal() {
+  if (sealState.status === 'pending') return;
+  const a = pick.A, b = pick.B;
+  try {
+    if (!PREVIEW && !onChain) { await switchChain(); await refreshWallet(); if (!onChain) return; }
+    sealState = { status: 'pending' }; renderSeal();
+    const res = await chain.seal(a, b);
+    sealState = { status: 'done', ...res };
+  } catch (e) {
+    const rejected = e.code === 'ACTION_REJECTED' || e.code === 4001;
+    sealState = {
+      status: 'error',
+      message: rejected ? 'You cancelled the request in MetaMask. Nothing was sealed.'
+        : e.code === 'INSUFFICIENT_FUNDS' ? `Not enough ${NET.currency.symbol} to cover gas for this transaction.`
+        : 'The stars didn’t align — the transaction failed. Please try again.',
+    };
+  }
+  renderSeal(); loadMine();
+}
+
+async function copyLink(btn) {
+  const link = btn.dataset.link;
+  try { await navigator.clipboard.writeText(link); }
+  catch {
+    const ta = Object.assign(document.createElement('textarea'), { value: link });
+    document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  }
+  btn.textContent = 'Link copied ✓';
+  setTimeout(() => { btn.textContent = 'Copy share link'; }, 1800);
+}
+
+/* Look up ?id= */
+async function loadLookup() {
+  const raw = params.get('id');
+  if (raw === null) return;
+  const card = $('lookupCard');
+  $('lookup').hidden = false; $('hero').hidden = true;
+  const notFound = () => {
+    card.innerHTML = `<div class="pair">Reading not found</div>
+      <p class="blurb">No reading with that ID has been sealed${PREVIEW ? ' in this browser' : ' on ' + NET.name}.</p>
+      <div class="actions"><a class="btn btn-primary btn-block" href="./#pick">Create a reading</a></div>`;
+  };
+  if (!/^\d{1,15}$/.test(raw)) return notFound();
+  card.innerHTML = `<p class="blurb"><span class="spinner" style="display:inline-block;vertical-align:-3px;margin-right:10px"></span>Consulting the stars…</p>`;
+  try {
+    const r = await chain.get(Number(raw));
+    if (!r) return notFound();
+    card.innerHTML = readingMarkup(r) + `
+      <p class="meta">Reading #${r.id} · sealed ${fmtDate(r.ts)}${r.creator
+        ? ` by <a href="${NET.explorer}/address/${r.creator}" target="_blank" rel="noopener">${short(r.creator)}</a>` : ''}${PREVIEW ? ' · preview' : ''}</p>
+      <div class="actions">
+        <button class="btn btn-gold btn-block" data-act="copy" data-link="${shareUrl(r.id)}">Copy share link</button>
+        <a class="btn btn-ghost btn-block" href="./${NET_KEY === 'testnet' ? '?net=testnet' : ''}#pick">Read your own stars</a>
+      </div>`;
+    animateReading(card);
+  } catch {
+    card.innerHTML = `<div class="pair">The sky is cloudy</div>
+      <p class="blurb">Couldn’t reach ${NET.name} right now.</p>
+      <div class="actions"><button class="btn btn-primary btn-block" id="retryLookup">Try again</button></div>`;
+    $('retryLookup').onclick = loadLookup;
+  }
+}
+
+/* My readings */
+async function loadMine() {
+  const show = PREVIEW ? previewStore.all().length > 0 : !!account;
+  $('mine').hidden = !show;
+  if (!show) return;
+  try {
+    const list = await chain.listOf(account);
+    $('mineList').innerHTML = list.length ? list.map(r => `
+      <a class="row" href="${shareUrl(r.id)}">
+        <span class="glyph">${SIGNS[r.a].glyph} ${SIGNS[r.b].glyph}</span>
+        <span class="who"><b>${SIGNS[r.a].name} × ${SIGNS[r.b].name}</b><small>#${r.id} · ${fmtDate(r.ts)}</small></span>
+        <span class="sc">${r.score}%</span>
+      </a>`).join('') : `<p class="empty">No readings sealed from this wallet yet.</p>`;
+  } catch {
+    $('mineList').innerHTML = `<p class="empty">Couldn’t load your readings right now.</p>`;
+  }
+}
+
+/* Footer */
+$('contractLine').innerHTML = NET.contract
+  ? `Contract on ${NET.name}: <a class="addr" href="${NET.explorer}/address/${NET.contract}" target="_blank" rel="noopener">${NET.contract}</a>`
+  : `Contract on ${NET.name}: not deployed yet (preview mode)`;
+
+/* Starfield */
+(function stars() {
+  const cv = $('stars'), ctx = cv.getContext('2d');
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  function draw() {
+    const d = Math.min(devicePixelRatio || 1, 2), w = innerWidth, h = innerHeight;
+    cv.width = w * d; cv.height = h * d; ctx.scale(d, d); seed = 7;
+    const n = Math.round(w * h / 5200);
+    for (let i = 0; i < n; i++) {
+      const r = rnd() < .08 ? 1.3 : rnd() * .8 + .2;
+      ctx.fillStyle = `rgba(244,241,255,${(rnd() * .6 + .15).toFixed(2)})`;
+      ctx.beginPath(); ctx.arc(rnd() * w, rnd() * h, r, 0, 7); ctx.fill();
+    }
+  }
+  draw(); let last = innerWidth;
+  addEventListener('resize', () => { if (innerWidth !== last) { last = innerWidth; draw(); } });
+})();
+
+refreshWallet();
+loadLookup();
+</script>
+</body>
+</html>
