@@ -8,7 +8,7 @@ Pick two zodiac signs, get a playful compatibility score, and seal the reading o
 
 | | |
 |---|---|
-| Live site | https://starcrossed.my.id |
+| Live site | https://hello-vnt.github.io/Starcrossed/ (custom domain starcrossed.my.id pending DNS) |
 | Contract (BOT Chain mainnet, chain ID 677) | [`0x35b05ce3b8254C4BAFaE7AE912b1018dF5e71376`](https://scan.botchain.ai/address/0x35b05ce3b8254C4BAFaE7AE912b1018dF5e71376) |
 | Contract (testnet, chain ID 968) | _not deployed yet_ |
 
