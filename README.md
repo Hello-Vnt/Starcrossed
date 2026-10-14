@@ -16,7 +16,6 @@ Pick two zodiac signs, get a playful compatibility score, and seal the reading o
 
 - `index.html` — the whole frontend (ethers.js v6 from CDN, no build step, no backend)
 - `contracts/Starcrossed.sol` — the contract (Solidity ^0.8.20)
-- `deploy.html` — one-click deploy from MetaMask (compiled bytecode embedded)
 - `build/Starcrossed.standard-input.json` — compiler input for explorer verification
 
 ## Run locally
@@ -31,14 +30,7 @@ Then open http://localhost:4577. Until a contract address is configured the site
 
 The contract compiles with Solidity 0.8.20 (optimizer 200 runs, EVM `paris`) and has been dry-run against both BOT Chain RPCs.
 
-**Easiest: the built-in deploy page**
-
-1. Run the site locally and open http://localhost:4577/deploy.html in a browser with MetaMask.
-2. Click **Deploy to Testnet (968)**, confirm in MetaMask, and try the app at http://localhost:4577/?net=testnet (on localhost the app picks up the address you just deployed automatically).
-3. Click **Deploy to Mainnet (677)** — about 0.01 BOT in gas.
-4. Paste each address into the matching `contract: ''` field in the `NETWORKS` config near the top of the script in `index.html`, and into the Status table above. Preview mode switches off for that network.
-
-**Or Remix:** paste `contracts/Starcrossed.sol` into https://remix.ethereum.org, compile with 0.8.20 and EVM version `paris`, deploy with *Injected Provider – MetaMask*.
+Paste `contracts/Starcrossed.sol` into https://remix.ethereum.org, compile with 0.8.20 and EVM version `paris`, deploy with *Injected Provider – MetaMask*.
 
 | Network | Chain ID | RPC | Explorer |
 |---|---|---|---|
