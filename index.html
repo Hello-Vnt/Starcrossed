@@ -217,6 +217,16 @@ section{padding:28px 0}
 footer{padding:40px 0 max(28px,env(safe-area-inset-bottom)); text-align:center; font-size:.82rem; color:var(--muted)}
 footer p{margin:6px 0}
 footer .addr{word-break:break-all}
+.chain{
+  display:flex; flex-direction:column; align-items:center; gap:12px; max-width:520px; margin:0 auto 26px;
+  padding:22px 20px; border-radius:var(--radius); border:1px solid var(--line); background:rgba(27,21,66,.55);
+  color:var(--muted); text-decoration:none; transition:border-color .2s, box-shadow .2s;
+}
+.chain:hover{border-color:var(--line-strong); box-shadow:0 0 30px -10px rgba(108,59,255,.8)}
+.chain .label{font-size:.62rem}
+.chain img{display:block; height:28px; width:auto}
+.chain p{margin:0; font-size:.86rem; line-height:1.55; max-width:44ch; text-wrap:balance}
+.chain .more{font-family:var(--display); font-weight:600; font-size:.66rem; letter-spacing:.2em; text-transform:uppercase; color:var(--violet-soft)}
 
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (min-width:860px){
@@ -314,6 +324,12 @@ footer .addr{word-break:break-all}
   </main>
 
   <footer>
+    <a class="chain" href="https://www.botchain.ai/en/" target="_blank" rel="noopener">
+      <span class="label">Sealed on</span>
+      <img src="assets/botchain-logo.png" alt="BOT Chain" width="143" height="28">
+      <p>BOT Chain is an EVM-compatible Layer 1 blockchain built for AI agents, DePIN networks and decentralized apps. Every Starcrossed reading lives there permanently.</p>
+      <span class="more">Visit botchain.ai ↗</span>
+    </a>
     <p id="contractLine"></p>
     <p>For entertainment only.</p>
   </footer>
